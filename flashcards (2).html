@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ciências — Flashcards</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:       #0a0a0a;
+  --surface:  #111111;
+  --card:     #181818;
+  --border:   #2a2a2a;
+  --border-hi:#3a3a3a;
+  --text:     #f0f0f0;
+  --muted:    #555555;
+  --subtle:   #333333;
+  --accent:   #e8e8e8;
+  --green:    #4ade80;
+  --yellow:   #facc15;
+  --red:      #f87171;
+  --blue:     #60a5fa;
+  --radius:   10px;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding: 2.5rem 1.25rem;
+}
+
+.app { max-width: 640px; margin: 0 auto; }
+
+/* NAV */
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2.5rem;
+}
+.nav-title {
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.nav-actions { display: flex; gap: 8px; }
+.nav-btn {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  border-radius: var(--radius);
+  padding: 7px 14px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+  font-family: inherit;
+}
+.nav-btn:hover { color: var(--text); border-color: var(--border-hi); }
+.nav-btn.active { color: var(--text); border-color: var(--border-hi); background: var(--card); }
+
+/* EMPTY STATE */
+.empty {
+  text-align: center;
+  padding: 5rem 0;
+}
+.empty-icon { font-size: 36px; margin-bottom: 1rem; color: var(--subtle); }
+.empty h2 { font-size: 16px; font-weight: 500; color: var(--muted); margin-bottom: 6px; }
+.empty p { font-size: 13px; color: var(--subtle); }
+
+/* TOPIC LIST */
+.topic-list { display: flex; flex-direction: column; gap: 1px; }
+.topic-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  gap: 12px;
+}
+.topic-row:last-child { border-bottom: none; }
+.topic-row:hover .topic-name { color: var(--text); }
+.topic-name { font-size: 15px; font-weight: 400; color: #999; transition: color 0.15s; flex: 1; }
+.topic-count { font-size: 12px; color: var(--subtle); min-width: 60px; text-align: right; }
+.topic-del {
+  background: none;
+  border: none;
+  color: var(--subtle);
+  cursor: pointer;
+  padding: 4px;
+  font-size: 15px;
+  line-height: 1;
+  transition: color 0.15s;
+}
+.topic-del:hover { color: var(--red); }
+.topic-start {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  border-radius: 6px;
+  padding: 5px 12px;
+  font-size: 12px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+.topic-start:hover { color: var(--text); border-color: var(--border-hi); }
+
+/* NEW TOPIC FORM */
+.new-topic-form {
+  display: none;
+  margin-top: 1.5rem;
+  padding: 1.25rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.new-topic-form.open { display: block; }
+.form-row { display: flex; gap: 8px; align-items: center; }
+.inp {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 14px;
+  padding: 9px 12px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.inp:focus { border-color: var(--border-hi); }
+.inp::placeholder { color: var(--subtle); }
+.inp-grow { flex: 1; }
+.btn-primary {
+  background: var(--text);
+  color: var(--bg);
+  border: none;
+  border-radius: 8px;
+  padding: 9px 18px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+  transition: opacity 0.15s;
+}
+.btn-primary:hover { opacity: 0.85; }
+.btn-ghost {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  border-radius: 8px;
+  padding: 9px 16px;
+  font-size: 14px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+.btn-ghost:hover { color: var(--text); border-color: var(--border-hi); }
+
+/* ADD CARD FORM */
+.add-form { display: flex; flex-direction: column; gap: 16px; }
+.form-label { font-size: 12px; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 6px; display: block; }
+.textarea {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 15px;
+  padding: 12px;
+  font-family: inherit;
+  outline: none;
+  resize: vertical;
+  min-height: 72px;
+  width: 100%;
+  transition: border-color 0.15s;
+  line-height: 1.5;
+}
+.textarea:focus { border-color: var(--border-hi); }
+.textarea::placeholder { color: var(--subtle); }
+.select-inp {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 14px;
+  padding: 9px 12px;
+  font-family: inherit;
+  outline: none;
+  width: 100%;
+  cursor: pointer;
+}
+.select-inp:focus { border-color: var(--border-hi); }
+
+/* CARD LIST */
+.card-list { display: flex; flex-direction: column; gap: 1px; margin-top: 2rem; }
+.card-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+.card-item:last-child { border-bottom: none; }
+.card-q { font-size: 14px; color: var(--text); flex: 1; line-height: 1.4; }
+.card-a { font-size: 13px; color: var(--muted); margin-top: 3px; }
+.card-del {
+  background: none; border: none; color: var(--subtle);
+  cursor: pointer; font-size: 15px; padding: 2px; line-height: 1;
+  transition: color 0.15s; flex-shrink: 0; margin-top: 2px;
+}
+.card-del:hover { color: var(--red); }
+
+/* STUDY */
+.study-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 2rem;
+}
+.back-btn {
+  background: none; border: none; color: var(--muted);
+  cursor: pointer; font-size: 20px; padding: 4px; line-height: 1;
+  transition: color 0.15s;
+}
+.back-btn:hover { color: var(--text); }
+.study-title { font-size: 14px; color: var(--muted); }
+.progress-bar {
+  width: 100%;
+  height: 2px;
+  background: var(--surface);
+  border-radius: 2px;
+  margin-bottom: 2.5rem;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: var(--text);
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+
+.card-scene {
+  perspective: 1200px;
+  width: 100%;
+  height: 300px;
+  cursor: pointer;
+  margin-bottom: 2rem;
+}
+.card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.45s cubic-bezier(.4,0,.2,1);
+}
+.card-inner.flipped { transform: rotateY(180deg); }
+.card-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem;
+  text-align: center;
+  border: 1px solid var(--border);
+  user-select: none;
+}
+.card-front { background: var(--surface); }
+.card-back  { background: var(--card); transform: rotateY(180deg); border-color: var(--border-hi); }
+.card-tag {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--subtle);
+  margin-bottom: 16px;
+}
+.card-body {
+  font-size: 20px;
+  font-weight: 400;
+  color: var(--text);
+  line-height: 1.55;
+}
+.card-hint { font-size: 12px; color: var(--subtle); margin-top: 14px; }
+
+/* RATING BUTTONS */
+.rating-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 1.5rem;
+}
+.rating-row.hidden { display: none; }
+.rate-btn {
+  padding: 12px 8px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid;
+  font-family: inherit;
+  transition: opacity 0.15s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.rate-btn:hover { opacity: 0.8; }
+.rate-btn .key { font-size: 10px; opacity: 0.6; font-weight: 400; }
+.rate-again { background: #1a0a0a; border-color: #3a1515; color: var(--red); }
+.rate-hard  { background: #1a1500; border-color: #3a3000; color: var(--yellow); }
+.rate-good  { background: #0a1a0a; border-color: #153015; color: var(--green); }
+.rate-easy  { background: #0a0f1a; border-color: #151f3a; color: var(--blue); }
+
+.study-hint { font-size: 12px; color: var(--subtle); text-align: center; }
+
+/* RESULTS */
+.results { text-align: center; padding: 3rem 0; }
+.result-score { font-size: 56px; font-weight: 300; color: var(--text); line-height: 1; }
+.result-label { font-size: 14px; color: var(--muted); margin-top: 8px; margin-bottom: 2.5rem; }
+.result-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; max-width: 380px; margin: 0 auto 2.5rem; }
+.result-cell { border-radius: 10px; padding: 14px 8px; border: 1px solid; }
+.result-cell .num { font-size: 24px; font-weight: 400; margin-bottom: 4px; }
+.result-cell .lbl { font-size: 11px; opacity: 0.7; }
+.result-again { background: #1a0a0a; border-color: #3a1515; color: var(--red); }
+.result-hard  { background: #1a1500; border-color: #3a3000; color: var(--yellow); }
+.result-good  { background: #0a1a0a; border-color: #153015; color: var(--green); }
+.result-easy  { background: #0a0f1a; border-color: #151f3a; color: var(--blue); }
+.result-actions { display: flex; gap: 10px; justify-content: center; }
+
+/* SECTION HEADER */
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+.section-label { font-size: 12px; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; }
+</style>
+</head>
+<body>
+<div class="app" id="app"></div>
+<script>
+let state = {
+  view: 'home',
+  tab: 'topics',
+  decks: JSON.parse(localStorage.getItem('fc_decks') || 'null') || (function(){
+    return [
+      { id: 'd_cardio', name: 'Sistema Cardiovascular e Respiratório', cards: [
+        { id:'c1',  q:'Qual a função do sistema cardiovascular?', a:'Transportar sangue, oxigênio, nutrientes, hormônios e remover resíduos pelo corpo.' },
+        { id:'c2',  q:'Quais os músculos responsáveis pela respiração?', a:'Diafragma e músculos intercostais.' },
+        { id:'c3',  q:'Qual a função do sangue na respiração humana?', a:'Levar oxigênio às células e transportar gás carbônico das células para os pulmões.' },
+        { id:'c4',  q:'Qual o nome do processo que ocorre nas células e tecidos?', a:'Respiração celular.' },
+        { id:'c5',  q:'Qual o nome do processo que ocorre na troca gasosa nos pulmões?', a:'Hematose.' },
+        { id:'c6',  q:'Qual a função da respiração pulmonar?', a:'Realizar a troca de gases: captar oxigênio e eliminar gás carbônico.' },
+        { id:'c7',  q:'Quais os tipos sanguíneos?', a:'A, B, AB e O (podem ser Rh positivo ou negativo).' },
+        { id:'c8',  q:'Quais os tipos de vasos sanguíneos?', a:'Artérias, veias e capilares.' },
+        { id:'c9',  q:'Qual a diferença entre artérias e veias?', a:'Artérias levam o sangue do coração aos órgãos; veias trazem o sangue dos órgãos de volta ao coração.' },
+        { id:'c10', q:'Quais são as camadas do coração?', a:'Endocárdio, miocárdio e pericárdio.' },
+        { id:'c11', q:'O que é a válvula tricúspide?', a:'Válvula entre o átrio direito e o ventrículo direito.' },
+        { id:'c12', q:'O que é a válvula bicúspide (mitral)?', a:'Válvula entre o átrio esquerdo e o ventrículo esquerdo.' },
+        { id:'c13', q:'Qual é a câmara cardíaca mais forte?', a:'Ventrículo esquerdo.' },
+        { id:'c14', q:'O que é inspiração?', a:'Entrada de ar com contração do diafragma.' },
+        { id:'c15', q:'O que é expiração?', a:'Saída de ar com relaxamento do diafragma.' },
+        { id:'c16', q:'O que é a grande circulação?', a:'Circulação do coração para todo o corpo e retorno ao coração.' },
+        { id:'c17', q:'O que é a pequena circulação?', a:'Circulação do coração aos pulmões e retorno ao coração.' },
+        { id:'c18', q:'O que é sístole?', a:'Contração do coração para bombear sangue.' },
+        { id:'c19', q:'O que é diástole?', a:'Relaxamento do coração para receber sangue.' },
+        { id:'c20', q:'O que é hematose?', a:'Troca de gases nos pulmões: entra oxigênio no sangue e sai gás carbônico.' },
+        { id:'c21', q:'O que é difusão?', a:'Passagem de gases de maior para menor concentração.' },
+        { id:'c22', q:'O que é a glote?', a:'Abertura da laringe por onde passa o ar.' },
+        { id:'c23', q:'O que é a epiglote?', a:'Cartilagem que fecha a glote durante a deglutição.' },
+        { id:'c24', q:'Explique a hematose.', a:'Nos alvéolos, o oxigênio passa para o sangue e o gás carbônico passa do sangue para os pulmões.' },
+      ]},
+      { id: 'd_urin', name: 'Sistema Urinário', cards: [
+        { id:'c25', q:'Quais são os órgãos do sistema urinário?', a:'Rins, ureteres, bexiga urinária e uretra.' },
+        { id:'c26', q:'Qual é a função do sistema urinário?', a:'Eliminar resíduos, regular água e sais minerais e manter o equilíbrio do organismo.' },
+        { id:'c27', q:'O que é o córtex renal?', a:'Camada externa do rim.' },
+        { id:'c28', q:'O que é a medula renal?', a:'Região interna do rim.' },
+        { id:'c29', q:'O que é a pelve renal?', a:'Região que coleta a urina produzida pelos rins.' },
+        { id:'c30', q:'O que é o ureter?', a:'Tubo que leva a urina dos rins para a bexiga.' },
+        { id:'c31', q:'O que é a bexiga urinária?', a:'Órgão que armazena a urina.' },
+        { id:'c32', q:'O que é a uretra?', a:'Canal que elimina a urina para fora do corpo.' },
+        { id:'c33', q:'Quanto de urina um adulto produz por dia?', a:'Cerca de 1,5 a 2 litros.' },
+        { id:'c34', q:'Qual é a composição da urina?', a:'Água, ureia, sais minerais e outras substâncias dissolvidas.' },
+        { id:'c35', q:'Como ocorre a filtração do sangue e a produção da urina?', a:'Os rins filtram o sangue, retiram resíduos, excesso de água e sais, formando a urina.' },
+      ]},
+    ];
+  })(),
+  studyDeckId: null,
+  studyQueue: [],
+  studyIndex: 0,
+  flipped: false,
+  ratings: {},
+  newCard: { q: '', a: '', deckId: '' },
+  newTopicName: '',
+  showNewTopic: false,
+};
+
+function save() {
+  try { localStorage.setItem('fc_decks', JSON.stringify(state.decks)); } catch(e) {}
+}
+function getDeck(id) { return state.decks.find(d => d.id === id); }
+
+function startStudy(deckId) {
+  const deck = getDeck(deckId);
+  if (!deck || !deck.cards.length) { alert('Adicione cards antes de estudar.'); return; }
+  state.studyDeckId = deckId;
+  state.studyQueue = [...deck.cards].sort(() => Math.random() - 0.5);
+  state.studyIndex = 0;
+  state.flipped = false;
+  state.ratings = {};
+  state.view = 'study';
+  render();
+}
+
+function flipCard() {
+  state.flipped = !state.flipped;
+  document.getElementById('card-inner')?.classList.toggle('flipped', state.flipped);
+  document.getElementById('rating-row')?.classList.toggle('hidden', !state.flipped);
+}
+
+function rateCard(r) {
+  state.ratings[state.studyQueue[state.studyIndex].id] = r;
+  state.studyIndex++;
+  state.flipped = false;
+  if (state.studyIndex >= state.studyQueue.length) { state.view = 'results'; }
+  render();
+}
+
+function deleteCard(deckId, cardId) {
+  const deck = getDeck(deckId);
+  if (!deck) return;
+  deck.cards = deck.cards.filter(c => c.id !== cardId);
+  save(); render();
+}
+
+function addCard() {
+  const { q, a, deckId } = state.newCard;
+  if (!q.trim() || !a.trim() || !deckId) { alert('Preencha tudo e selecione um tópico.'); return; }
+  getDeck(deckId).cards.push({ id: 'c' + Date.now(), q: q.trim(), a: a.trim() });
+  state.newCard = { q: '', a: '', deckId };
+  save(); render(); setTab('cards');
+}
+
+function addTopic() {
+  const name = state.newTopicName.trim();
+  if (!name) return;
+  state.decks.push({ id: 'd' + Date.now(), name, cards: [] });
+  state.newTopicName = '';
+  state.showNewTopic = false;
+  save(); render();
+}
+
+function deleteTopic(id) {
+  if (!confirm('Excluir tópico e todos os cards?')) return;
+  state.decks = state.decks.filter(d => d.id !== id);
+  save(); render();
+}
+
+function setTab(tab) {
+  state.tab = tab;
+  render();
+}
+
+function renderHome() {
+  return `
+    <nav class="nav">
+      <span class="nav-title">Ciências</span>
+      <div class="nav-actions">
+        <button class="nav-btn ${state.tab==='topics'?'active':''}" onclick="setTab('topics')">Tópicos</button>
+        <button class="nav-btn ${state.tab==='add'?'active':''}" onclick="setTab('add')">Novo card</button>
+        <button class="nav-btn ${state.tab==='cards'?'active':''}" onclick="setTab('cards')">Cards</button>
+      </div>
+    </nav>
+    <div id="tab-body">${state.tab==='topics' ? renderTopics() : state.tab==='add' ? renderAdd() : renderCards()}</div>
+  `;
+}
+
+function renderTopics() {
+  const html = state.decks.length === 0 ? `
+    <div class="empty">
+      <div class="empty-icon"><i class="ti ti-books"></i></div>
+      <h2>Nenhum tópico ainda</h2>
+      <p>Crie um tópico para começar a adicionar cards.</p>
+    </div>
+  ` : `
+    <div class="topic-list">
+      ${state.decks.map(d => `
+        <div class="topic-row">
+          <span class="topic-name">${d.name}</span>
+          <span class="topic-count">${d.cards.length} card${d.cards.length !== 1 ? 's' : ''}</span>
+          <button class="topic-start" onclick="startStudy('${d.id}')">Estudar</button>
+          <button class="topic-del" onclick="deleteTopic('${d.id}')" title="Excluir"><i class="ti ti-trash"></i></button>
+        </div>
+      `).join('')}
+    </div>
+  `;
+
+  return `
+    ${html}
+    <div style="margin-top:1.5rem;">
+      <button class="btn-ghost" onclick="toggleNewTopic()" style="width:100%;">+ Novo tópico</button>
+    </div>
+    <div class="new-topic-form ${state.showNewTopic ? 'open' : ''}" id="new-topic-form">
+      <div class="form-row">
+        <input class="inp inp-grow" type="text" placeholder="Nome do tópico" id="topic-name-inp"
+          value="${state.newTopicName}"
+          oninput="state.newTopicName=this.value"
+          onkeydown="if(event.key==='Enter')addTopic()">
+        <button class="btn-primary" onclick="addTopic()">Criar</button>
+        <button class="btn-ghost" onclick="toggleNewTopic()">Cancelar</button>
+      </div>
+    </div>
+  `;
+}
+
+function renderAdd() {
+  const opts = state.decks.map(d =>
+    `<option value="${d.id}" ${state.newCard.deckId===d.id?'selected':''}>${d.name}</option>`
+  ).join('');
+  return `
+    <div class="add-form">
+      <div>
+        <label class="form-label">Tópico</label>
+        <select class="select-inp" onchange="state.newCard.deckId=this.value">
+          <option value="">Selecione um tópico...</option>
+          ${opts}
+        </select>
+      </div>
+      <div>
+        <label class="form-label">Pergunta</label>
+        <textarea class="textarea" placeholder="O que você quer memorizar?" oninput="state.newCard.q=this.value">${state.newCard.q}</textarea>
+      </div>
+      <div>
+        <label class="form-label">Resposta</label>
+        <textarea class="textarea" placeholder="A resposta ou explicação..." oninput="state.newCard.a=this.value">${state.newCard.a}</textarea>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn-primary" onclick="addCard()">Adicionar card</button>
+      </div>
+    </div>
+  `;
+}
+
+function renderCards() {
+  const all = state.decks.flatMap(d => d.cards.map(c => ({ ...c, deckId: d.id, deckName: d.name })));
+  if (!all.length) return `
+    <div class="empty">
+      <div class="empty-icon"><i class="ti ti-cards"></i></div>
+      <h2>Nenhum card ainda</h2>
+      <p>Vá em "Novo card" para criar o primeiro.</p>
+    </div>
+  `;
+  return state.decks.filter(d => d.cards.length).map(d => `
+    <div style="margin-bottom:2rem;">
+      <div class="section-header">
+        <span class="section-label">${d.name}</span>
+        <span style="font-size:12px;color:var(--subtle)">${d.cards.length} card${d.cards.length!==1?'s':''}</span>
+      </div>
+      <div class="card-list">
+        ${d.cards.map(c => `
+          <div class="card-item">
+            <div style="flex:1;">
+              <div class="card-q">${c.q}</div>
+              <div class="card-a">${c.a}</div>
+            </div>
+            <button class="card-del" onclick="deleteCard('${d.id}','${c.id}')" title="Excluir"><i class="ti ti-trash"></i></button>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderStudy() {
+  const deck = getDeck(state.studyDeckId);
+  const card = state.studyQueue[state.studyIndex];
+  const total = state.studyQueue.length;
+  const pct = Math.round((state.studyIndex / total) * 100);
+  return `
+    <div class="study-header">
+      <button class="back-btn" onclick="state.view='home';render()"><i class="ti ti-arrow-left"></i></button>
+      <span class="study-title">${deck.name} · ${state.studyIndex + 1} de ${total}</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+    <div class="card-scene" onclick="flipCard()" role="button" tabindex="0"
+         onkeydown="if(event.key===' '||event.key==='Enter'){event.preventDefault();flipCard()}">
+      <div class="card-inner" id="card-inner">
+        <div class="card-face card-front">
+          <div class="card-tag">pergunta</div>
+          <div class="card-body">${card.q}</div>
+          <div class="card-hint">clique para revelar</div>
+        </div>
+        <div class="card-face card-back">
+          <div class="card-tag">resposta</div>
+          <div class="card-body">${card.a}</div>
+        </div>
+      </div>
+    </div>
+    <div class="rating-row hidden" id="rating-row">
+      <button class="rate-btn rate-again" onclick="rateCard('again')">
+        <span>De novo</span><span class="key">1</span>
+      </button>
+      <button class="rate-btn rate-hard" onclick="rateCard('hard')">
+        <span>Difícil</span><span class="key">2</span>
+      </button>
+      <button class="rate-btn rate-good" onclick="rateCard('good')">
+        <span>Bom</span><span class="key">3</span>
+      </button>
+      <button class="rate-btn rate-easy" onclick="rateCard('easy')">
+        <span>Fácil</span><span class="key">4</span>
+      </button>
+    </div>
+    <div class="study-hint">espaço para virar · 1–4 para avaliar</div>
+  `;
+}
+
+function renderResults() {
+  const vals = Object.values(state.ratings);
+  const c = { again:0, hard:0, good:0, easy:0 };
+  vals.forEach(v => c[v]++);
+  const total = vals.length;
+  const score = Math.round(((c.good + c.easy) / total) * 100);
+  return `
+    <div class="results">
+      <div class="result-score">${score}%</div>
+      <div class="result-label">${c.good + c.easy} de ${total} acertados</div>
+      <div class="result-grid">
+        <div class="result-cell result-again"><div class="num">${c.again}</div><div class="lbl">De novo</div></div>
+        <div class="result-cell result-hard"><div class="num">${c.hard}</div><div class="lbl">Difícil</div></div>
+        <div class="result-cell result-good"><div class="num">${c.good}</div><div class="lbl">Bom</div></div>
+        <div class="result-cell result-easy"><div class="num">${c.easy}</div><div class="lbl">Fácil</div></div>
+      </div>
+      <div class="result-actions">
+        <button class="btn-primary" onclick="startStudy('${state.studyDeckId}')">Estudar de novo</button>
+        <button class="btn-ghost" onclick="state.view='home';render()">Voltar</button>
+      </div>
+    </div>
+  `;
+}
+
+function toggleNewTopic() {
+  state.showNewTopic = !state.showNewTopic;
+  render();
+  if (state.showNewTopic) document.getElementById('topic-name-inp')?.focus();
+}
+
+function render() {
+  const app = document.getElementById('app');
+  if (state.view === 'home') app.innerHTML = renderHome();
+  else if (state.view === 'study') app.innerHTML = renderStudy();
+  else if (state.view === 'results') app.innerHTML = renderResults();
+  document.onkeydown = e => {
+    if (state.view !== 'study') return;
+    if (e.key === ' ') { e.preventDefault(); flipCard(); }
+    else if (state.flipped) {
+      if (e.key==='1') rateCard('again');
+      else if (e.key==='2') rateCard('hard');
+      else if (e.key==='3') rateCard('good');
+      else if (e.key==='4') rateCard('easy');
+    }
+  };
+}
+
+render();
+</script>
+</body>
+</html>
